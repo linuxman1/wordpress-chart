@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: helm-deploy
+  namespace: linuxman11-dev
+spec:
+  params:
+    - name: release-name
+      type: string
+      default: my-wordpress
+    - name: chart-path
+      type: string
+      default: ./wordpress-chart
+    - name: namespace
+      type: string
+      default: linuxman11-dev
+  workspaces:
+    - name: source
+  steps:
+    - name: helm-upgrade
+      image: docker.io/alpine/helm:latest
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        echo "=== Deploying $(params.release-name) ==="
+        helm upgrade --install $(params.release-name) $(params.chart-path) \
+          --namespace $(params.namespace) \
+          --rollback-on-failure \
+          --timeout 3m \
+          --wait
+        echo "=== Deploy complete ==="
+        helm history $(params.release-name) --namespace $(params.namespace) | tail -3

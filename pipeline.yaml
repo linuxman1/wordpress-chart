@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: wordpress-deploy-pipeline
+  namespace: linuxman11-dev
+spec:
+  params:
+    - name: git-url
+      type: string
+      description: Git repo URL containing the chart
+    - name: git-revision
+      type: string
+      default: main
+    - name: release-name
+      type: string
+      default: my-wordpress
+    - name: app-url
+      type: string
+      default: my-wordpress-wordpress-linuxman11-dev.apps.rm2.thpm.p1.openshiftapps.com
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: clone-repo
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+        - name: deleteExisting
+          value: "true"
+    - name: deploy-chart
+      taskRef:
+        name: helm-deploy
+      runAfter:
+        - clone-repo
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: release-name
+          value: $(params.release-name)
+        - name: chart-path
+          value: ./wordpress-chart
+    - name: smoke-test
+      taskRef:
+        name: smoke-test
+      runAfter:
+        - deploy-chart
+      params:
+        - name: app-url
+          value: $(params.app-url)

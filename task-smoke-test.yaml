@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: smoke-test
+  namespace: linuxman11-dev
+spec:
+  params:
+    - name: app-url
+      type: string
+  steps:
+    - name: curl-test
+      image: docker.io/curlimages/curl:latest
+      script: |
+        #!/bin/sh
+        echo "=== Smoke testing $(params.app-url) ==="
+        STATUS=$(curl -sk -o /dev/null -w "%{http_code}" https://$(params.app-url)/wp-login.php)
+        echo "HTTP Status: $STATUS"
+        if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+          echo "PASS - WordPress is responding"
+        else
+          echo "FAIL - Unexpected status $STATUS"
+          exit 1
+        fi

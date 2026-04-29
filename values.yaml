@@ -3,6 +3,10 @@ wordpress:
   replicas: 1
   port: 8080
   storage: 1Gi
+  config:
+    debug: "false"
+    memoryLimit: "256M"
+    maxUploadSize: "64M"
   probes:
     liveness:
       path: /wp-login.php
@@ -46,8 +50,3 @@ service:
 
 route:
   enabled: true
-
-  config:
-    debug: "false"
-    memoryLimit: "256M"
-    maxUploadSize: "64M"
