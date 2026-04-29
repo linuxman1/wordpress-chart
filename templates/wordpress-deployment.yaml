@@ -14,6 +14,7 @@ spec:
       labels:
         app: {{ .Release.Name }}-wordpress
     spec:
+      serviceAccountName: {{ .Release.Name }}-sa
       containers:
         - name: wordpress
           image: {{ .Values.wordpress.image }}
@@ -29,6 +30,9 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-db-secret
                   key: mysql-password
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
           ports:
             - containerPort: {{ .Values.wordpress.port }}
           resources:

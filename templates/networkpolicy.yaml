@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-mysql-only-from-wordpress
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-mysql
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-wordpress
+      ports:
+        - port: 3306
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-wordpress-allow-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-wordpress
+  ingress:
+    - ports:
+        - port: {{ .Values.wordpress.port }}
+  policyTypes:
+    - Ingress

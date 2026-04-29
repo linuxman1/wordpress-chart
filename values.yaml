@@ -46,3 +46,8 @@ service:
 
 route:
   enabled: true
+
+  config:
+    debug: "false"
+    memoryLimit: "256M"
+    maxUploadSize: "64M"
