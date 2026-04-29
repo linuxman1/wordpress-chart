@@ -1,0 +1,14 @@
+{{- if .Values.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Release.Name }}-wordpress
+spec:
+  to:
+    kind: Service
+    name: {{ .Release.Name }}-wordpress
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+{{- end }}

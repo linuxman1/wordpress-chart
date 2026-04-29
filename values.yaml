@@ -1,0 +1,48 @@
+wordpress:
+  image: docker.io/bitnami/wordpress:latest
+  replicas: 1
+  port: 8080
+  storage: 1Gi
+  probes:
+    liveness:
+      path: /wp-login.php
+      initialDelaySeconds: 60
+      periodSeconds: 30
+    readiness:
+      path: /wp-login.php
+      initialDelaySeconds: 30
+      periodSeconds: 10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+mysql:
+  image: registry.access.redhat.com/ubi8/mysql-80:latest
+  rootPassword: rootpass123
+  database: wordpress_db
+  user: wp_user
+  password: wp_pass123
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+service:
+  type: ClusterIP
+
+route:
+  enabled: true

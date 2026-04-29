@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-wordpress
+  labels:
+    app: {{ .Release.Name }}-wordpress
+spec:
+  replicas: {{ .Values.wordpress.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-wordpress
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: {{ .Values.wordpress.image }}
+          env:
+            - name: WORDPRESS_DATABASE_HOST
+              value: {{ .Release.Name }}-mysql
+            - name: WORDPRESS_DATABASE_NAME
+              value: {{ .Values.mysql.database | quote }}
+            - name: WORDPRESS_DATABASE_USER
+              value: {{ .Values.mysql.user | quote }}
+            - name: WORDPRESS_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-db-secret
+                  key: mysql-password
+          ports:
+            - containerPort: {{ .Values.wordpress.port }}
+          resources:
+            requests:
+              cpu: {{ .Values.wordpress.resources.requests.cpu }}
+              memory: {{ .Values.wordpress.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.wordpress.resources.limits.cpu }}
+              memory: {{ .Values.wordpress.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.wordpress.probes.liveness.path }}
+              port: {{ .Values.wordpress.port }}
+            initialDelaySeconds: {{ .Values.wordpress.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.wordpress.probes.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.wordpress.probes.readiness.path }}
+              port: {{ .Values.wordpress.port }}
+            initialDelaySeconds: {{ .Values.wordpress.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.wordpress.probes.readiness.periodSeconds }}
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /bitnami/wordpress
+      volumes:
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-wordpress-pvc
