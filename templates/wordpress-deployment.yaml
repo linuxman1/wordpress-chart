@@ -6,6 +6,8 @@ metadata:
     app: {{ .Release.Name }}-wordpress
 spec:
   replicas: {{ .Values.wordpress.replicas }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: {{ .Release.Name }}-wordpress
@@ -14,7 +16,6 @@ spec:
       labels:
         app: {{ .Release.Name }}-wordpress
     spec:
-
       containers:
         - name: wordpress
           image: {{ .Values.wordpress.image }}
