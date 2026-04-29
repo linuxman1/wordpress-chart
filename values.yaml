@@ -10,11 +10,11 @@ wordpress:
   probes:
     liveness:
       path: /wp-login.php
-      initialDelaySeconds: 60
+      initialDelaySeconds: 120
       periodSeconds: 30
     readiness:
       path: /wp-login.php
-      initialDelaySeconds: 30
+      initialDelaySeconds: 90
       periodSeconds: 10
   resources:
     requests:
@@ -25,7 +25,7 @@ wordpress:
       memory: 512Mi
 
 mysql:
-  image: registry.access.redhat.com/ubi8/mysql-80:latest
+  image: docker.io/mysql:8.0
   rootPassword: rootpass123
   database: wordpress_db
   user: wp_user

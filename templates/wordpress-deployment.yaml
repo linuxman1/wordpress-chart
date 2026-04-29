@@ -31,6 +31,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-db-secret
                   key: mysql-password
+            - name: WORDPRESS_DATABASE_PORT_NUMBER
+              value: "3306"
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-config
